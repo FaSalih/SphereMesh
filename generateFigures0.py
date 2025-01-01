@@ -23,6 +23,7 @@ fig = plt.figure(figsize=(10, 10))
 
 # Generate and visualize sphere meshes
 for j, mesh_code in enumerate(mesh_codes):
+    mesh_name = mesh_names[j]
     for i, gen in enumerate(gens):
         P, tri = sm.generate_sphere_mesh(gen, mesh_code)
         # Transpose the points for easier indexing
@@ -35,7 +36,7 @@ for j, mesh_code in enumerate(mesh_codes):
         # Adjust the view
         ax.set_box_aspect([1, 1, 1])  # Equal aspect ratio
         # Add attributes
-        ax.set_title(f'{mesh_names[j]} (Generation {gen})', fontsize=14, fontweight='bold')
+        ax.set_title(f'{mesh_name} (Generation {gen})', fontsize=14, fontweight='bold')
 
 plt.tight_layout()
 plt.subplots_adjust(hspace=0.4)

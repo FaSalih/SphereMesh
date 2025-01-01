@@ -1,5 +1,5 @@
 '''
-Translating the  `SphereMesh` library from matlab to python
+Translating the  `SphereMesh` library from matlab to python and adding adjustable sphere radii.
 
 SECTIONS:
     . Importing Libraries
@@ -28,39 +28,40 @@ from matplotlib.tri import Triangulation
 # ----------------------------------------
 # Main Functions
 # ----------------------------------------
-def generate_sphere_mesh(generation, mesh_type):
+def generate_sphere_mesh(generation, mesh_type, radius=1):
     '''Generates a sphere mesh by refining a platonic solid projected onto a sphere of radius 1
     Args:
         generation (int): number of refinements
         mesh_type (str): platonic solid to start with (tet, oct, ico)
+        radius (float): radius of the sphere that points are projected onto (default: 1)
     Returns:
         P: 3 x N array of vertices
         tri: M x 3 array of vertices forming each face
     '''
     if mesh_type == 'tet':  # starts with tetrahedron
-        P, tri = get_tetrahedral_mesh()
+        P, tri = get_tetrahedral_mesh(radius=radius)
     elif mesh_type == 'oct':  # starts with octahedron
-        P, tri = get_octahedral_mesh()
+        P, tri = get_octahedral_mesh(radius=radius)
     elif mesh_type == 'ico':  # starts with icosahedron
-        P, tri = get_icosahedral_mesh()
+        P, tri = get_icosahedral_mesh(radius=radius)
     else:
         print('Error: Unrecognized polyhedron type.')
         P = np.eye(3)
         tri = np.array([[1, 2, 3]])
     
     for n in range(1, generation + 1):
-        P, tri = refine_mesh(P, tri)
+        P, tri = refine_mesh(P, tri, radius=radius)
     
     return P, tri
 
-def refine_mesh(Pin, triin):
+def refine_mesh(Pin, triin, radius=1):
     """
     Refines a 3D triangular mesh by adding midpoints of edges as new vertices.
 
     Parameters:
         Pin: Input points (3 x N array).
         triin: Input triangles (M x 3 array, each row contains indices of vertices).
-
+        radius (float): radius of the sphere that points are projected onto (default: 1)
     Returns:
         P: Refined points.
         tri: Refined triangles.
@@ -83,6 +84,7 @@ def refine_mesh(Pin, triin):
     # Compute new vertices as midpoints of edges
     Pnew = Pin[:, edges_unique[:, 0]] + Pin[:, edges_unique[:, 1]]
     Pnew = Pnew / np.linalg.norm(Pnew, axis=0, keepdims=True)  # Normalize to unit sphere
+    Pnew *= radius  # Scale to the specified sphere radius
 
     # Find indices of new vertices
     def find_indices(edges_s, edges_unique):
@@ -140,35 +142,43 @@ def visualize_mesh(P, tri):
 # ----------------------------------------
 # Auxillary Functions
 # ----------------------------------------
-def get_tetrahedral_mesh():
+def get_tetrahedral_mesh(radius=1):
     '''Initializes a tetrahedral mesh as as platonic solid projected onto a sphere of radius 1
     Args:
-        None
+        radius (float): radius of the sphere that points are projected onto (default: 1)
     Returns:
         P: 3 x 4 array of vertices
         tri: 4 x 3 array of vertices forming each face
     '''
+    # Define the vertices of a tetrahedron
     P = np.array([[1, 1, 1],
                   [1, -1, -1],
                   [-1, 1, -1],
                   [-1, -1, 1]]).T
+    # Normalize vertices to unit sphere
     P = P / np.tile(np.sqrt(np.sum(P**2, axis=0)), (3, 1))
+    # Scale vertices to the desired radius
+    P *= radius
+    # Center the vertices around the origin
     P = P - np.tile(np.mean(P, axis=1, keepdims=True), (1, P.shape[1]))
+    # Apply random rotation
     P = randomly_rotate(P)
+    # Index the vertices of each face
     tri = np.array([[1, 2, 3],
                     [4, 2, 1],
                     [1, 3, 4],
                     [4, 3, 2]]) - 1
     return P, tri
 
-def get_octahedral_mesh():
+def get_octahedral_mesh(radius=1):
     '''Initializes an octahedral mesh as a platonic solid projected onto a sphere of radius 1
     Args:
-        None
+        radius (float): radius of the sphere that points are projected onto (default: 1)
     Returns:
         P: 3 x 6 array of vertices
         tri: 8 x 3 array of vertices forming each face
     '''
+    # Define the vertices of an octahedron
     P = np.array([
         [1, 0, 0],
         [0, 1, 0],
@@ -177,11 +187,15 @@ def get_octahedral_mesh():
         [0, -1, 0],
         [0, 0, -1]
     ]).T
-    
+    # Normalize vertices to unit sphere
     P = P / np.sqrt(np.sum(P**2, axis=0))
+    # Scale vertices to the desired radius
+    P *= radius
+    # Center the vertices around the origin
     P = P - np.mean(P, axis=1, keepdims=True)
+    # Apply random rotation
     P = randomly_rotate(P)
-    
+    # Index the vertices of each face
     tri = np.array([
         [3, 1, 2],
         [3, 2, 4],
@@ -195,14 +209,15 @@ def get_octahedral_mesh():
     
     return P, tri
 
-def get_icosahedral_mesh():
+def get_icosahedral_mesh(radius=1):
     '''Initializes an icosahedral mesh as a platonic solid projected onto a sphere of radius 1
     Args:
-        None
+        radius (float): radius of the sphere that points are projected onto (default: 1)
     Returns:
         P: 3 x 12 array of vertices
         tri: 20 x 3 array of vertices forming each face
     '''
+    # Define the vertices of an icosahedron
     phi = (1 + np.sqrt(5)) / 2
     P = np.array([
         [-1, phi, 0],
@@ -218,11 +233,15 @@ def get_icosahedral_mesh():
         [-phi, 0, -1],
         [-phi, 0, 1]
     ]).T
-    
+    # Normalize vertices to unit sphere
     P = P / np.sqrt(np.sum(P**2, axis=0))
+    # Scale vertices to the desired radius
+    P *= radius
+    # Center the vertices around the origin
     P = P - np.mean(P, axis=1, keepdims=True)
+    # Apply random rotation
     P = randomly_rotate(P)
-    
+    # Index the vertices of each face
     tri = np.array([
         [1, 12, 6],
         [1, 6, 2],
