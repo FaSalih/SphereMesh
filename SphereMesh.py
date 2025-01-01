@@ -28,16 +28,18 @@ from matplotlib.tri import Triangulation
 # ----------------------------------------
 # Main Functions
 # ----------------------------------------
-def generate_sphere_mesh(generation, mesh_type, radius=1):
+def generate_sphere_mesh(generation, mesh_type, radius=1, center=(0, 0, 0)):
     '''Generates a sphere mesh by refining a platonic solid projected onto a sphere of radius 1
     Args:
         generation (int): number of refinements
         mesh_type (str): platonic solid to start with (tet, oct, ico)
         radius (float): radius of the sphere that points are projected onto (default: 1)
+        center (tuple): center of the sphere (default: (0, 0, 0))
     Returns:
         P: 3 x N array of vertices
         tri: M x 3 array of vertices forming each face
     '''
+    # Initialize the mesh as a platonic solid
     if mesh_type == 'tet':  # starts with tetrahedron
         P, tri = get_tetrahedral_mesh(radius=radius)
     elif mesh_type == 'oct':  # starts with octahedron
@@ -49,9 +51,13 @@ def generate_sphere_mesh(generation, mesh_type, radius=1):
         P = np.eye(3)
         tri = np.array([[1, 2, 3]])
     
+    # Refine the mesh
     for n in range(1, generation + 1):
         P, tri = refine_mesh(P, tri, radius=radius)
     
+    # Center the vertices around the specified center
+    P = P + np.array(center).reshape(-1, 1)
+
     return P, tri
 
 def refine_mesh(Pin, triin, radius=1):

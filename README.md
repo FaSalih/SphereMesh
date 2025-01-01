@@ -9,7 +9,7 @@ Translated to Python from the original matlab code by Siddharth Maddali: `https:
 import SphereMesh as sm
 
 # Generate a sphere mesh
-P, tri = sm.generate_sphere_mesh(3, 'oct', radius=1.5)
+P, tri = sm.generate_sphere_mesh(3, 'oct', radius=1.5, center=(0.0,0.0,0.0))
 
 # Visualize the mesh
 sm.visualize_mesh(P, tri)
@@ -18,6 +18,7 @@ sm.visualize_mesh(P, tri)
 1. `generation` is the number of recursive bisections desired. The more this value, the finer the mesh, but also the larger the output arrays. If `generation` is set to zero, then the surface meshes of the original platonic solids are returned. A value of 3 or 4 for an icosahedral mesh results in approximately equal-sized triangular mesh elements. The node positions in these high-density cases can be used as an approximation for uniform sampling of a sphere.
 1. `type` can currently take three string values: `tet`, `oct` and `ico` for tetrahedral, octahedral and icosahedral starting shapes respectively. 
 1. `radius` is the radius of the sphere the mesh is to be projected onto
+1. `center` center of the sphere the mesh is to be projected onto
 
 ### Outputs:
 1. `P` is a 3XN array of 3D points on the unit sphere (norm of each column is 1) which denote the mesh nodes. 
@@ -27,4 +28,7 @@ sm.visualize_mesh(P, tri)
 ![Created using matplotlib](python_meshes.png  "Mesh examples using `sm.generate_sphere_mesh()`. Varying mesh types and generations.")
 
 
-![Created using matplotlib](python_meshes.png  "Mesh examples using `sm.generate_sphere_mesh(). Varying sphere scale and generations.`")
+![Created using matplotlib](python_meshes_scaled.png  "Mesh examples using `sm.generate_sphere_mesh(). Varying sphere scale and generations.`")
+
+
+![Created using matplotlib](python_meshes_shifted.png  "Mesh examples using `sm.generate_sphere_mesh(). Varying sphere centers.`")
